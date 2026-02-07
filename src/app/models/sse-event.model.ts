@@ -1,7 +1,7 @@
 export interface SseEvent {
-    type: 'connected' | 'progress' | 'status';
+    type: 'connected' | 'progress' | 'status' | 'reconnecting' | 'disconnected';
     jobId?: string;
-    payload: any;
+    payload?: any;
     status?: string;
     message?: string;
 }

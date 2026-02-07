@@ -1,63 +1,70 @@
 <div class="job-processor-container">
     <div class="card">
-        <h1>Text Processing Job</h1>
-        <p class="subtitle">Enter text to process. The result will be streamed character by character.</p>
-
-        <div class="input-section">
+      <h1>Text Processing Job</h1>
+      <p class="subtitle">Enter text to process. The result will be streamed character by character.</p>
+  
+      <div class="input-section">
         <label for="inputText">Input Text:</label>
         <textarea
-            id="inputText"
-            [(ngModel)]="inputText"
-            [disabled]="isProcessing"
-            placeholder="Enter text to process..."
-            rows="4"
-            class="input-field"
+          id="inputText"
+          [(ngModel)]="inputText"
+          [disabled]="isProcessing"
+          placeholder="Enter text to process..."
+          rows="4"
+          class="input-field"
         ></textarea>
-        </div>
-
-        <div class="button-section">
+      </div>
+  
+      <div class="button-section">
         <button
-            type="button"
-            (click)="processText()"
-            [disabled]="isProcessing || !inputText.trim()"
-            class="btn btn-primary"
+          type="button"
+          (click)="processText()"
+          [disabled]="isProcessing || !inputText.trim()"
+          class="btn btn-primary"
         >
-            {{ isProcessing ? 'Processing...' : 'Process Text' }}
+          {{ isProcessing ? 'Processing...' : 'Process Text' }}
         </button>
-
+  
         <button
-            type="button"
-            (click)="cancelJob()"
-            [disabled]="!isProcessing || !currentJobId"
-            class="btn btn-secondary"
+          type="button"
+          (click)="cancelJob()"
+          [disabled]="!isProcessing || !currentJobId"
+          class="btn btn-secondary"
         >
-            Cancel Job
+          Cancel Job
         </button>
-        </div>
-
-        <div *ngIf="jobStatus" class="status-section">
+      </div>
+  
+      <div *ngIf="jobStatus" class="status-section">
         <div class="status-badge" [class]="'status-' + jobStatus.toLowerCase()">
-            Status: {{ jobStatus }}
+          Status: {{ jobStatus }}
         </div>
+      </div>
+  
+      <div *ngIf="isReconnecting || connectionStatus" class="connection-section">
+        <div class="connection-status" [class.reconnecting]="isReconnecting">
+          <span *ngIf="isReconnecting" class="reconnect-indicator">🔄</span>
+          {{ connectionStatus || 'Connecting...' }}
         </div>
-
-        <div *ngIf="error" class="error-section">
+      </div>
+  
+      <div *ngIf="error" class="error-section">
         <div class="error-message">
-            <strong>Error:</strong> {{ error }}
+          <strong>Error:</strong> {{ error }}
         </div>
-        </div>
-
-        <div *ngIf="progressText || isProcessing" class="progress-section">
-        <h3>Progress:</h3>
+      </div>
+  
+      <div *ngIf="progressText || isProcessing" class="progress-section">
+        <h3>Progress (Streaming):</h3>
         <div class="progress-text">
-            <span class="progress-content">{{ progressText }}</span>
-            <span *ngIf="isProcessing" class="cursor">|</span>
+          <span class="progress-content">{{ progressText }}</span>
+          <span *ngIf="isProcessing" class="cursor">|</span>
         </div>
-        </div>
-
-        <div *ngIf="result && !isProcessing" class="result-section">
+      </div>
+  
+      <div *ngIf="result && !isProcessing" class="result-section">
         <h3>Final Result:</h3>
         <div class="result-text">{{ result }}</div>
-        </div>
+      </div>
     </div>
-</div>
+  </div>
