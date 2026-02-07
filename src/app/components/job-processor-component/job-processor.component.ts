@@ -23,13 +23,17 @@ export class JobProcessorComponent implements OnInit, OnDestroy {
   result: string | null = null;
   isReconnecting: boolean = false;
   connectionStatus: string = '';
+  stateRestored: boolean = false;
 
   private sseSubscription?: Subscription;
   private statusCheckInterval?: any;
+  private readonly STORAGE_KEY = 'JobProcessorState';
 
   constructor(private jobService: JobService, private ngZone: NgZone, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.restoreState();
+  }
 
   ngOnDestroy(): void {
     this.cleanup();
@@ -53,6 +57,9 @@ export class JobProcessorComponent implements OnInit, OnDestroy {
 
       this.currentJobId = response.jobId;
       this.jobStatus = 'Created';
+      this.connectionStatus = 'Connecting...';
+
+      this.saveState();
 
       this.connectToProgressStream(response.jobId);
 
@@ -71,6 +78,7 @@ export class JobProcessorComponent implements OnInit, OnDestroy {
     this.jobService.cancelJob(this.currentJobId).subscribe({
       next: () => {
         this.jobStatus = 'Cancelling';
+        this.saveState();
       },
       error: (error) => {
         console.error('Failed to cancel job:', error);
@@ -103,9 +111,11 @@ export class JobProcessorComponent implements OnInit, OnDestroy {
             this.connectionStatus = 'Disconnected';
           } else if (event.type === 'progress' && event.payload) {
             this.progressText += event.payload;
+            this.saveState();
             this.cdr.detectChanges();
           } else if (event.type === 'status' && event.status) {
             this.jobStatus = event.status;
+            this.saveState();
             this.cdr.detectChanges();
           }
         });
@@ -136,7 +146,10 @@ export class JobProcessorComponent implements OnInit, OnDestroy {
         
         if (['Completed', 'Failed', 'Cancelled'].includes(status.jobStatus)) {
           this.isProcessing = false;
+          this.clearState();
           this.cleanup();
+        } else {
+          this.saveState();
         }
         
         this.cdr.detectChanges();
@@ -156,8 +169,11 @@ export class JobProcessorComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
           if (['Completed', 'Failed', 'Cancelled'].includes(status.jobStatus)) {
             this.isProcessing = false;
+            this.clearState();
             this.cdr.detectChanges();
             this.cleanup();
+          } else {
+            this.saveState();
           }
         }});
       } catch (error) {
@@ -172,7 +188,127 @@ export class JobProcessorComponent implements OnInit, OnDestroy {
     this.error = null;
     this.jobStatus = '';
     this.currentJobId = null;
+    this.isReconnecting = false;
+    this.connectionStatus = '';
+    this.stateRestored = false;
+    this.clearState();
     this.cleanup();
+  }
+
+  private saveState(): void {
+    try{
+      const state = {
+        currentJobId: this.currentJobId,
+        progressText: this.progressText,
+        jobStatus: this.jobStatus,
+        inputText: this.inputText,
+        isProcessing: this.isProcessing,
+        timestamp: Date.now()
+      };
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
+    } catch (error) {
+      console.warn('Failed to save state', error);
+    }
+  }
+
+  private async restoreState(): Promise<void> {
+    try{
+      const savedStateStr = localStorage.getItem(this.STORAGE_KEY);
+      if (!savedStateStr) {
+        return;
+      }
+
+      const savedState = JSON.parse(savedStateStr);
+
+      const maxAge = 24 * 60 * 60 * 1000;
+      if (savedState.timestamp && Date.now() - savedState.timestamp > maxAge) {
+        this.clearState();
+        return;
+      }
+
+      this.currentJobId = savedState.currentJobId || null;
+      this.progressText = savedState.progressText || '';
+      this.jobStatus = savedState.jobStatus || '';
+      this.inputText = savedState.inputText || '';
+      this.result = savedState.result || null;
+      this.error = savedState.error || null;
+      this.isProcessing = savedState.isProcessing || false;
+
+      if (this.currentJobId && this.isProcessing) {
+        this.stateRestored = true;
+        await this.restoreJobConnection(this.currentJobId);
+        setTimeout(() => {
+          this.stateRestored = false;
+          this.cdr.detectChanges();
+        }, 3000);
+      } else if (this.currentJobId) {
+        this.stateRestored = true;
+        await this.checkJobFinalStatus(this.currentJobId);
+        setTimeout(() => {
+          this.stateRestored = false;
+          this.cdr.detectChanges();
+        }, 3000);
+      }
+
+      this.cdr.detectChanges();
+    } catch (error) {
+      console.error('Failed to restore state', error);
+      this.clearState();
+    }
+  }
+
+  private async restoreJobConnection(jobId: string): Promise<void> {
+    try {
+      const status = await firstValueFrom(this.jobService.getJobStatus(jobId));
+
+      if(!status) {
+        this.resetState();
+        return;
+      }
+
+      this.jobStatus = status.jobStatus;
+
+      if (['Completed', 'Failed', 'Cancelled'].includes(status.jobStatus)) {
+        this.isProcessing = false;
+        this.clearState();
+        this.cdr.detectChanges();
+        return;
+      }
+
+      this.connectionStatus = 'Reconnecting...';
+      this.isReconnecting = true;
+      this.connectToProgressStream(jobId);
+
+      this.startStatusPolling(jobId);
+
+      this.cdr.detectChanges();
+    } catch (error) {
+      console.error('Failed to restore job connection', error);
+      this.restoreState();
+    }
+  }
+
+  private async checkJobFinalStatus(jobId: string): Promise<void> {
+    try {
+      const status = await firstValueFrom(this.jobService.getJobStatus(jobId));
+      if (status) {
+        this.jobStatus = status.jobStatus;
+        
+        this.clearState();
+        this.cdr.detectChanges();
+      }
+    } catch (error) {
+      console.error('Failed to check job final status:', error);
+      this.clearState();
+    }
+  }
+
+  private clearState(): void {
+    try {
+      localStorage.removeItem(this.STORAGE_KEY);
+    } catch (error) {
+      console.warn('Failed to clear state', error);
+    }
   }
 
   private cleanup(): void {

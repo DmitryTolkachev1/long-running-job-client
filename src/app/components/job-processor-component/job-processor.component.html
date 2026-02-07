@@ -40,6 +40,13 @@
           Status: {{ jobStatus }}
         </div>
       </div>
+
+      <div *ngIf="stateRestored" class="restored-section">
+        <div class="restored-message">
+          <span class="restored-indicator">✓</span>
+          State restored from previous session
+        </div>
+      </div>
   
       <div *ngIf="isReconnecting || connectionStatus" class="connection-section">
         <div class="connection-status" [class.reconnecting]="isReconnecting">
