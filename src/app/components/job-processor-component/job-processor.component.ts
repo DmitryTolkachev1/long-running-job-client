@@ -39,6 +39,26 @@ export class JobProcessorComponent implements OnInit, OnDestroy {
     this.cleanup();
   }
 
+  getStatusBadgeClass(status: string): string {
+    if (['Created', 'Queued', 'Taken', 'Running', 'Retrying'].includes(status)) {
+      return 'bg-primary';
+    }
+    
+    if (status === 'Cancelling') {
+      return 'bg-warning text-dark';
+    }
+    
+    if (status === 'Completed') {
+      return 'bg-success';
+    }
+    
+    if (['Failed', 'Cancelled', 'Abandoned'].includes(status)) {
+      return 'bg-danger';
+    }
+    
+    return 'bg-secondary';
+  }
+
   async processText(): Promise<void> {
     if (!this.inputText.trim()) {
       this.error = 'Please enter some text to process';
