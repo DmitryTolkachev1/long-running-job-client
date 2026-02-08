@@ -1,4 +1,6 @@
 export const environment = {
     production: false,
-    jobsApiUrl: 'https://localhost:7204/api/jobs'
+    jobsApiUrl: 'http://localhost:8080/api/jobs',
+    username: 'user',
+    password: 'password'
 }

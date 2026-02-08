@@ -61,8 +61,11 @@ export class JobProcessorComponent implements OnInit, OnDestroy {
 
   async processText(): Promise<void> {
     if (!this.inputText.trim()) {
-      this.error = 'Please enter some text to process';
-      return;
+      this.ngZone.run(() => {
+        this.error = 'Please enter some text to process';
+        this.cdr.detectChanges();
+        return;
+      });
     }
 
     this.resetState();
@@ -85,8 +88,12 @@ export class JobProcessorComponent implements OnInit, OnDestroy {
 
       this.startStatusPolling(response.jobId);
     } catch (error: any) {
-      this.error = error.message || 'Failed to create job';
-      this.isProcessing = false;
+      this.ngZone.run(() => {
+        this.error = 'Failed to create job';
+        this.isProcessing = false;
+        this.cdr.detectChanges();
+      })
+      
     }
   }
 
@@ -97,24 +104,29 @@ export class JobProcessorComponent implements OnInit, OnDestroy {
 
     this.jobService.cancelJob(this.currentJobId).subscribe({
       next: () => {
-        this.jobStatus = 'Cancelling';
-        this.saveState();
+        this.ngZone.run(() => {
+          this.jobStatus = 'Cancelling';
+          this.saveState();
+          this.cdr.detectChanges();
+        })
+        
       },
       error: (error) => {
         console.error('Failed to cancel job:', error);
-        this.error = 'Failed to cancel job';
+        this.ngZone.run(() => {
+          this.error = 'Failed to cancel job';
+          this.cdr.detectChanges();
+        })
       }
     });
   }
 
   private connectToProgressStream(jobId: string): void {
-    // Enable reconnection with up to 10 attempts
     this.sseSubscription = this.jobService.streamJobProgress(jobId, {
       reconnect: true,
       maxReconnectAttempts: 10
     }).subscribe({
       next: (event: SseEvent) => {
-        // Run inside Angular zone to trigger change detection
         this.ngZone.run(() => {
           if (event.type === 'connected') {
             console.log('SSE connection established');

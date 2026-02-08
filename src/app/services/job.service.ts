@@ -7,6 +7,7 @@ import { CreateJobRequest, CreateJobResponse } from '../models/create-job.model'
 import { JobStatus } from '../models/job-status.model';
 import { CancelJobResponse } from '../models/cancel-job.model';
 import { SseEvent } from '../models/sse-event.model';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,11 +18,13 @@ export class JobService {
   constructor(
     private http: HttpClient,
     private userService: UserService,
+    private authService: AuthService,
     private ngZone: NgZone
   ) {}
 
   createJob(input: string, jobType: number): Observable<CreateJobResponse> {
     const headers = new HttpHeaders({
+      'Authorization': this.authService.getAuthorizationHeader(),
       'X-User-Id': this.userService.getUserId(),
       'Content-Type': 'application/json'
     });
@@ -40,6 +43,7 @@ export class JobService {
 
   getJobStatus(jobId: string): Observable<JobStatus> {
     const headers = new HttpHeaders({
+      'Authorization': this.authService.getAuthorizationHeader(),
       'X-User-Id': this.userService.getUserId(),
     });
 
@@ -48,6 +52,7 @@ export class JobService {
 
   cancelJob(jobId: string): Observable<CancelJobResponse> {
     const headers = new HttpHeaders({
+      'Authorization': this.authService.getAuthorizationHeader(),
       'X-User-Id': this.userService.getUserId(),
     });
 
@@ -74,6 +79,7 @@ export class JobService {
       try {
         const response = await fetch(`${this.jobsApiUrl}/${jobId}/connection`, {
           headers: {
+            'Authorization': this.authService.getAuthorizationHeader(),
             'X-User-Id': this.userService.getUserId(),
             'Accept': 'text/event-stream'
           }
