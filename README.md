@@ -1,59 +1,70 @@
 # LongRunninJobClient
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.3.
+This application is a SPA with integration of [long-running-jobs-simulation](https://github.com/DmitryTolkachev1/long-running-job-simulation)
 
-## Development server
+## Built with
+- [Angular](https://angular.dev/)
+- [Angular CLI](https://github.com/angular/angular-cli)
+- [Bootstrap](https://getbootstrap.com/)
 
-To start a local development server, run:
+## Getting started
 
-```bash
-ng serve
-```
+### Prerequisites
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- [Angular 21.1.3](https://angular.dev/)  
+- [Git](https://git-scm.com/)  
+- IDE: [VS Code](https://code.visualstudio.com/) + [Angular CLI](https://github.com/angular/angular-cli)
 
-## Code scaffolding
+### Installation
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+1. **Clone** the repository:  
+   ```bash
+   git clone https://github.com/DmitryTolkachev1/long-running-job-client.git
+   cd long-running-job-client
+2. **Checkout** the `master` branch:
+   ```bash
+   git switch master
+3. **Install** dependencies:
+    ```bash
+    npm install
+4. **Configure** your environment: [environment.ts](src\environments\environment.ts)
+5. **Run** the application:
+    ```bash
+    npm run start
 
-```bash
-ng generate component component-name
-```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Local run using Docker/Podman
 
-```bash
-ng generate --help
-```
+1. **Build image**:
+    - For Docker:
+    ```bash
+    cd long-running-job-client
+    docker build -t job-client:latest .
+    ```
+    - For Podman:
+    ```bash
+    cd long-running-job-client
+    podman build -t job-client:latest .
+2. **Start** a container:
+    - For Docker:
+    ```bash
+    docker run -p 9000:80 job-service:latest
+    ```
+    - For Podman:
+    ```bash
+    podman run -p 9000:80 job-service:latest
+3. **Visit** http://localhost:9000
 
-## Building
 
-To build the project run:
+## Contributing
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+1. **Branch off**:
+   - Features: git checkout -b feature/<branch-name>
+   - Bugs: git checkout -b bug/<branch-name>
+   - Tests: git checkout -b test/<branch-name>
+3. **Implement & commit** your changes. Commit prefixes: [`feat:`, `fix:`, `test:`]
+4. **Cover** new logic with unit tests.
+5. **Push** to your branch.
+6. **Open** a Pull Request, filling out the template.
+7. **Request** a code review.
+8. **Squash-merge** once approved.
