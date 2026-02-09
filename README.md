@@ -27,7 +27,7 @@ This application is a SPA with integration of [long-running-jobs-simulation](htt
 3. **Install** dependencies:
     ```bash
     npm install
-4. **Configure** your environment: [environment.ts](src\environments\environment.ts)
+4. **Configure** your environment: [environment.ts](src/environments/environment.ts)
 5. **Run** the application:
     ```bash
     npm run start
