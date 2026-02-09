@@ -48,11 +48,11 @@ This application is a SPA with integration of [long-running-jobs-simulation](htt
 2. **Start** a container:
     - For Docker:
     ```bash
-    docker run -p 9000:80 job-service:latest
+    docker run -p 9000:80 job-client:latest
     ```
     - For Podman:
     ```bash
-    podman run -p 9000:80 job-service:latest
+    podman run -p 9000:80 job-client:latest
 3. **Visit** http://localhost:9000
 
 
