@@ -1,0 +1,98 @@
+<div class="container my-4">
+    <div class="card shadow">
+      <div class="card-body p-4">
+        <h1 class="card-title mb-2">Text Processing Job</h1>
+        <p class="text-muted mb-4">
+          Enter text to process.
+        </p>
+
+        <div *ngIf="isReconnecting || connectionStatus" class="mb-2">
+            <div
+              class="alert"
+              [ngClass]="isReconnecting ? 'alert-warning' : 'alert-info'"
+              role="alert"
+            >
+              <span
+                *ngIf="isReconnecting"
+                class="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              {{ connectionStatus || 'Connecting...' }}
+            </div>
+          </div>
+  
+        <div class="mb-3">
+          <label for="inputText" class="form-label">Input Text:</label>
+          <textarea
+            id="inputText"
+            [(ngModel)]="inputText"
+            [disabled]="isProcessing"
+            placeholder="Enter text to process..."
+            rows="4"
+            class="form-control"
+          ></textarea>
+        </div>
+  
+        <div class="d-flex gap-2 mb-3">
+          <button
+            type="button"
+            (click)="processText()"
+            [disabled]="isProcessing || !inputText.trim()"
+            class="btn btn-primary"
+          >
+            {{ isProcessing ? 'Processing...' : 'Process Text' }}
+          </button>
+  
+          <button
+            type="button"
+            (click)="cancelJob()"
+            [disabled]="!isProcessing || !currentJobId"
+            class="btn btn-danger"
+          >
+            Cancel Job
+          </button>
+        </div>
+  
+        <div *ngIf="jobStatus" class="mb-2">
+          <span class="badge" [ngClass]="getStatusBadgeClass(jobStatus)">
+            Status: {{ jobStatus }}
+          </span>
+        </div>
+  
+        <div *ngIf="stateRestored" class="mb-2">
+          <div class="alert alert-success fade show" role="alert">
+            <span class="me-2">✓</span>
+            State restored from previous session
+          </div>
+        </div>
+  
+        <div *ngIf="error" class="mb-3">
+          <div class="alert alert-danger" role="alert">
+            <strong>Error:</strong> {{ error }}
+          </div>
+        </div>
+  
+        <div *ngIf="progressText || isProcessing" class="mt-4 pt-3 border-top">
+          <h5 class="mb-3">Progress (Streaming):</h5>
+          <div
+            class="bg-light border rounded p-3 font-monospace"
+            style="min-height: 100px; white-space: pre-wrap; word-wrap: break-word;"
+          >
+            <span>{{ progressText }}</span>
+            <span *ngIf="isProcessing" class="text-primary cursor-blink">|</span>
+          </div>
+        </div>
+  
+        <div *ngIf="result && !isProcessing" class="mt-4 pt-3 border-top">
+          <h5 class="mb-3">Final Result:</h5>
+          <div
+            class="bg-light border rounded p-3 font-monospace"
+            style="white-space: pre-wrap; word-wrap: break-word;"
+          >
+            {{ result }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
